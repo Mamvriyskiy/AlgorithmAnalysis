@@ -1,0 +1,138 @@
+\chapter{Технологическая часть}
+
+В данном разделе описаны требования к программному обеспечению, средства
+реализации, приведены листинги кода и данные, на которых будет проводиться
+тестирование.
+
+Программа должна предоставлять следующие возможности:
+\begin{itemize}[left=\parindent]
+    \item выбор режима работы: для единичного эксперимента и замер времени работы алгоритмов умножения матриц;
+    \item в режиме единичного эксперимента ввод размеров и содержимого каждой
+          матрицы и вывод полученного разными алгоритмами произведений;
+    \item в режиме замера времени происходит замер времени при различных
+          размерах матриц и построение графиков по полученным данным.
+\end{itemize}
+
+\section{Средства реализации}
+
+Для реализации данной лабораторной работы Go, так как имеет простой синтаксис, 
+большую библиотеку.
+
+Замеры времени проводились при помощи функции getThreadCpuTimeNs написанной на C, 
+подключенной с помощбю CGO.
+
+\section{Реализация алгоритмов}
+
+В данном подразделе представлены листинги кода ранее описанных алгоритмов:
+\begin{itemize}[left=\parindent]
+    \item стандартный алгоритм умножения матриц (листинг \ref{lst:std});
+    \item алгоритм Винограда (листинги \ref{lst:Winograd});
+    \item оптимизированный алгоритм Винограда (листинги
+          \ref{lst:optWinMulH}-\ref{lst:WinogradOpt}).
+\end{itemize}
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstinputlisting}[
+	caption={Реализация стандартного алгоритма умножения матриц},
+	label={lst:std},
+	linerange={94-106}
+]{../algorithms/algorithms.go}
+\end{lstinputlisting}
+\end{minipage}
+
+\begin{lstlisting}[label=lst:Winograd,caption=Функция нахождения расстояния Левенштейна-Дамерау с помощью рекурсии]
+func MulVinogradovA(matrixA, matrixB [][]int, a, b, c int) [][]int {
+    row := make([]int, a)
+    column := make([]int, c)
+    matrixC := make([][]int, a)
+
+    for i := 0; i < a; i++ {
+        matrixC[i] = make([]int, c)
+        for j := 0; j < b / 2 ; j++ {
+            row[i] = row[i] + matrixA[i][2 * j] * matrixA[i][2 * j + 1]
+        }
+    }
+
+    for i := 0; i < c; i++ {
+        for j := 0; j < b / 2; j++ {
+            column[i] = column[i] + matrixB[2 * j][i]*matrixB[2 * j + 1][i] 
+        }
+    }
+
+    for i := 0; i < a; i++ {
+        for j := 0; j < c; j++ {
+            matrixC[i][j] = -row[i] - column[j]
+            for k := 0; k < b / 2; k++ {
+                matrixC[i][j] = matrixC[i][j] + (matrixA[i][2 * k + 1] + matrixB[2 * k][j]) *
+                    (matrixA[i][2 * k] + matrixB[2 * k + 1][j])
+            }
+        }
+    }
+
+    if (b % 2 == 1) {
+        for i := 0; i < a; i++ {
+            for j := 0; j < c; j++ {
+                matrixC[i][j] = matrixC[i][j] + matrixA[i][b - 1] * matrixB[b - 1][j]
+            }
+        }
+    }   
+
+    return matrixC
+}
+\end{lstlisting}
+
+\begin{lstlisting}[label=lst:WinogradOpt,caption=Функция нахождения расстояния Левенштейна-Дамерау с помощью рекурсии]
+func MulVinogradovB(matrixA, matrixB [][]int, a, b, c int) [][]int {
+    row := make([]int, a)
+    column := make([]int, c)
+    matrixC := make([][]int, a)
+
+    num := b / 2
+
+    for i := 0; i < a; i++ {
+        matrixC[i] = make([]int, c)
+        buf := 0
+        for j := 0; j < num ; j++ {
+            buf += matrixA[i][j << 1] * matrixA[i][j << 1 + 1]
+        }
+        row[i] = buf
+    }
+
+    for i := 0; i < c; i++ {
+        buf := 0
+        for j := 0; j < num; j++ {
+            buf += matrixB[j << 1][i] * matrixB[j << 1 + 1][i] 
+        }
+        column[i] = buf
+    }
+
+    for i := 0; i < a; i++ {
+        for j := 0; j < c; j++ {
+            buf := -row[i] - column[j]
+            for k := 0; k < num; k++ {
+                buf += (matrixA[i][k << 1 + 1] + matrixB[k << 1][j]) *
+                    (matrixA[i][k << 1] + matrixB[k << 1 + 1][j])
+            }
+            matrixC[i][j] = buf
+        }
+    }
+
+    if (b % 2 == 1) {
+        l := b - 1
+        for i := 0; i < a; i++ {
+            for j := 0; j < c; j++ {
+                matrixC[i][j] += matrixA[i][l] * matrixB[l][j]
+            }
+        }
+    }   
+
+    return matrixC
+}
+\end{lstlisting}
+
+\section{Вывод}
+
+В данном разделе были реализованы алгоритмы умножения матриц: стандартный, 
+Винограда и оптимизированный Винограда. Также были написаны тесты для каждого класса 
+эквивалентности, описанного в конструкторском разделе.

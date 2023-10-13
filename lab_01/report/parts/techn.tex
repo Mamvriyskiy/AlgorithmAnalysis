@@ -1,0 +1,157 @@
+\chapter{Технологический раздел}
+
+\section{Требования к ПО}
+\textbf{Требования к вводу:}
+\begin{enumerate}
+	\item На вход подаются две строки в любой раскладке (в том числе и пустые);
+	\item ПО должно выводить полученное расстояние;
+\end{enumerate}
+
+\section{Средства реализации}
+Для реализации программы нахождения расстояние Левенштейна я выбрал язык программирования Golang. Данный
+выбор обусловлен моим желанием расширить свои знания в области применения данного язкыа программирования.
+
+\clearpage
+
+\section{Реализация алгоритмов}
+В следующих листингах приведена реализация алгоритмов нахождения расстония Левенштейна и Дамерау-Левенштейна.
+
+\begin{lstlisting}[label=lst:LM,caption=Функция нахождения расстояния Левенштейна нерекурсивным способом]
+func LM(matrix [][]int, a, b int, s1, s2 []rune) int { 
+	for i := 1; i < a; i++ {
+		r2 := s2[i - 1]
+		for j := 1; j < b; j++ {
+			r1 := s1[j - 1]
+			if r1 != r2 {
+				matrix[i][j] = min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1, matrix[i - 1][j - 1] + 1)
+			} else {
+				matrix[i][j] = min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1, matrix[i - 1][j - 1])
+			}
+		}
+	}
+
+	return matrix[a - 1][b - 1]
+}
+\end{lstlisting}
+
+\begin{lstlisting}[label=lst:DL,caption=Функция нахождения расстояния Левенштейна-Дамерау с помощью рекурсии]
+func DL(s1, s2 []rune) int {
+    lenB := len(s1)
+    lenA := len(s2)
+
+    dist := 0 
+
+    if lenA == 0 {
+        dist = lenB
+    } else if lenB == 0 {
+        dist = lenA
+    } else {
+        k := 0
+        if s1[lenB - 1] != s2[lenA - 1] {
+            k = 1
+        }	
+
+        dist = min(DL(s1, s2[ : lenA - 1]) + 1, DL(s1[ : lenB - 1], s2) + 1, DL(s1[ : lenB - 1], s2[ : lenA - 1]) + k)
+
+        if lenB > 1 && lenA > 1 && s1[lenB - 1] == s2[lenA - 2] && s1[lenB - 2] == s2[lenA - 1] {
+            dist = min(dist, DL(s1[ : lenB - 2], s2[ : lenA - 2]) + 1)
+        }
+    }
+
+    return dist
+}
+\end{lstlisting}
+
+\begin{lstlisting}[label=lst:DLCash,caption=Функция нахождения расстояния Левенштейна-Дамерау с помощью рекурсии и кеша]
+func DLCash(matrix [][]int, s1, s2 []rune) int {
+    lenB := len(s1)
+    lenA := len(s2)
+
+    dist := 0
+
+    if matrix[lenA][lenB] == -1 {
+        k := 0
+        if s1[lenB - 1] != s2[lenA - 1] {
+            k = 1
+        }
+
+        dist = min(DLCash(matrix, s1, s2[ : lenA - 1]) + 1, DLCash(matrix, s1[ : lenB - 1], s2) + 1, DLCash(matrix, s1[ : lenB - 1], s2[ : lenA - 1]) + k)
+
+        if lenB > 1 && lenA > 1 && s1[lenB - 1] == s2[lenA - 2] && s1[lenB - 2] == s2[lenA - 1] {
+            dist = min(dist, DLCash(matrix, s1[ : lenB - 2], s2[ : lenA - 2]) + 1)
+        }
+
+        matrix[lenA][lenB] = dist
+    } else {
+        dist = matrix[lenA][lenB]
+    }
+
+    return dist
+}
+\end{lstlisting}
+
+\begin{lstlisting}[label=lst:DLM,caption=Функция нахождения расстояния Дамерау-Левенштейна нерекурсивным способом]
+func DLM(matrix [][]int, a, b int, s1, s2 []rune) int {
+    for i := 1; i < a; i++ {
+        for j := 1; j < b; j++ {
+            if s1[j - 1] != s2[i - 1] {
+                matrix[i][j] = min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1, matrix[i - 1][j - 1] + 1)
+            } else {
+                matrix[i][j] = min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1, matrix[i - 1][j - 1])
+            }
+
+            if i > 2 && j > 2 && s1[j - 1] == s2[i - 2] && s1[j - 2] == s2[i - 1] {
+                matrix[i][j] = min(matrix[i][j], matrix[i - 2][j - 2] + 1)
+            }
+        }
+    }
+
+    return matrix[a - 1][b - 1]
+}
+\end{lstlisting}
+
+\clearpage
+
+\section{Тестирование}
+\begin{table}[ht]
+	\small
+	\begin{center}
+		\begin{threeparttable}
+		\label{tbl:func_tests}
+		\begin{tabular}{|c|c|c|c|c|c|}
+			\hline
+			\multicolumn{2}{|c|}{\bfseries Входные данные}
+			& \multicolumn{4}{c|}{\bfseries Расстояние и алгоритм} \\ 
+			\hline 
+			&
+			& \multicolumn{1}{c|}{\bfseries Левенштейна} 
+			& \multicolumn{3}{c|}{\bfseries Дамерау-Левенштейна} \\ \cline{3-6}
+			
+			\bfseries Строка 1 & \bfseries Строка 2 & \bfseries Итеративный & \bfseries Итеративный
+			
+			& \multicolumn{2}{c|}{\bfseries Рекурсивный} \\ \cline{5-6}
+			& & & & \bfseries Без кеша & \bfseries С кешом \\
+			\hline
+			a & d & 1 & 1 & 1 & 1 \\
+			\hline
+			a & a & 0 & 0 & 0 & 0 \\
+			\hline
+			переговоры & перегрел & 5 & 5 & 5 & 5 \\
+			\hline
+			cat & cats & 1 & 1 & 1 & 1 \\
+			\hline
+			кот & кто & 2 & 1 & 1 & 1 \\
+			\hline
+			12345 & 54321 & 4 & 4 & 4 & 4 \\
+			\hline
+		\end{tabular}	
+        \caption{Тестовые данные}
+		\end{threeparttable}
+	\end{center}
+\end{table}
+
+\section*{Вывод}
+Были реализованы алгоритмы поиска расстояния Левенштейна итеративно,
+а также поиска расстояния Дамерау–Левенштейна итеративно, рекурсивно и рекурсивного с кеширования. Проведено тестирование реализаций алгоритмов.
+
+

@@ -1,41 +1,38 @@
-package main
+package algorithms
 
 import (
-	"fmt"
-	//"math"
+	//"fmt"
 )
 
-func matrixLevenshtein(s1, s2 []rune) {
-	// lenS1 := utf8.RuneCountInString(s1) + 1
-	// lenS2 := utf8.RuneCountInString(s2) + 1
+func MatrixLevenshtein(s1, s2 []rune) int {
+	if len(s1) == 0 || len(s2) == 0 {
+		return 0;
+	}
 
 	lenS1 := len(s1) + 1
 	lenS2 := len(s2) + 1
-
 
 	matrix := createMatrix(lenS2, lenS1)
 
 	initMatrix(matrix, lenS2, lenS1)
 
-	createResult(matrix, lenS2, lenS1, s1, s2)
-
-	fmt.Println(matrix[lenS2 - 1][lenS1 - 1])
+	return LM(matrix, lenS2, lenS1, s1, s2)
 }
 
-func createResult(matrix [][]int, a, b int, s1, s2 []rune) { 
+func LM(matrix [][]int, a, b int, s1, s2 []rune) int { 
 	for i := 1; i < a; i++ {
 		r2 := s2[i - 1]
 		for j := 1; j < b; j++ {
-			k := 0
 			r1 := s1[j - 1]
-			//fmt.Println(r1, r2)
 			if r1 != r2 {
-				k++
+				matrix[i][j] = min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1, matrix[i - 1][j - 1] + 1)
+			} else {
+				matrix[i][j] = min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1, matrix[i - 1][j - 1])
 			}
-			
-			matrix[i][j] = min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1, matrix[i - 1][j - 1] + k)
 		}
 	}
+
+	return matrix[a - 1][b - 1]
 }
 
 func initMatrix(matrix [][]int, a, b int) {

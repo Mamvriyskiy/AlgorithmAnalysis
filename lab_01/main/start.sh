@@ -1,7 +1,7 @@
 #!/bin/bash
 
 k=0
-for ((i = 1; i < 2; i++)) do
+for ((i = 1; i < 10; i++)) do
     if [[ $i -lt 10 ]]; then
         a="0""$i"""
     else 
@@ -22,7 +22,7 @@ for ((i = 1; i < 2; i++)) do
         echo "$a TEST PASSED"
         k=$(($k+1))
     else
-        # diff "test.txt" "tests/$a.txt"
+        diff "test.txt" "tests/$a.a"
         echo "$a TEST FAILED"
     fi
 
