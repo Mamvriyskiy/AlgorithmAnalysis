@@ -1,10 +1,11 @@
 package main
 
 import (
-	"fmt"
+	//"fmt"
 	// "bufio"
 	// "os"
-	"./sorted"
+	//"./sorted"
+	"./checktime"
 )
 
 func main() {
@@ -12,11 +13,11 @@ func main() {
 
 	//var n int
 
-	sliceA := []int{100, 43, 4, 1, -3, -43, -432, -941}
+	// sliceA := []int{100, 43, 4, 1, -3, -43, -432, -941}
 
-	sorted.PancakeSort(sliceA)
+	// sorted.ShakerSort(sliceA)
 
-	if false {
-		fmt.Println(sliceA)
-	}
+	// fmt.Println(sliceA)
+
+	checktime.CheckTimeEX()
 }

@@ -1,9 +1,5 @@
 package sorted 
 
-// import (
-// 	"fmt"
-// )
-
 func searchMaxIndex(slice []int, lenl int) int {
 	indx := 0
 	maxl := slice[0]
