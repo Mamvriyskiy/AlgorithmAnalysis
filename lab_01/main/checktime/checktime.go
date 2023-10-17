@@ -23,7 +23,7 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
-const MAXLENGHTSTR = 15
+const MAXLENGHTSTR = 10
 
 func CheckTime() {
 	table := tablewriter.NewWriter(os.Stdout)
@@ -58,7 +58,7 @@ func CheckTime() {
             algorithms.RecursiveDLCash(s1, s2)
         }
         finish = C.getThreadCpuTimeNs()
-        timeRCashDL = int64(finish - start)
+        timeRCashDL = int64(finish - start) / 10
 
         if i <= 15 {
             start := C.getThreadCpuTimeNs()
