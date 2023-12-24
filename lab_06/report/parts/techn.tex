@@ -1,0 +1,208 @@
+\chapter{Технологическая часть}
+
+В данном разделе описаны требования к программному обеспечению, средства
+реализации, приведены листинги кода и данные, на которых будет проводиться
+тестирование.
+
+\section{Требования к программному обеспечению}
+
+Программа должна предоставлять следующие возможности:
+\begin{itemize}[left=\parindent]
+    \item ввод имени файла, хранящего матрицу смежности графа;
+    \item ввод коэффициентов для муравьиного алгоритма;
+    \item ввод максимального количества топлива;
+    \item вывод искомого пути и минимальной затраты;
+    \item подсчет времени работы алгоритмов на различных значениях количества
+        вершин;
+    \item параметризация муравьиного алоритма с оценкой точности при заданных
+        параметрах.
+\end{itemize}
+
+\section{Средства реализации}
+В данной работе для реализации был выбран язык программирования $Python \cite{python-lang}$, 
+так как требуется замерить процессорное время для выполняемой программы, 
+а также построить графики. Все эти инструменты присутствуют в выбранном языке программирования.
+
+Время работы было замерено с помощью функции \textit{process\_time(...)} из библиотеки 
+$time~\cite{python-lang-time}$.
+
+\clearpage
+\section{Реализация алгоритмов}
+
+В листинге \ref{lst:full_comb} представлен алгоритм полного перебора путей, а в листингах \ref{lst:ant_alg}-\ref{lst:pher} -- муравьиный алгоритм и дополнительные к нему функции.
+
+\begin{lstlisting}[label=lst:full_comb,caption=Релизация алгоритма полного пербора]
+    def full_combinations(matrix, size, max_fuel):
+    places = np.arange(size)
+    places_combs = list()
+
+    for combination in it.permutations(places):
+        comb_arr = list(combination)
+        places_combs.append(comb_arr)
+
+    min_dist = float("inf")
+    max_visit_cites = 0
+
+    for i in range(len(places_combs)):
+        flag = 0
+        cur_dist = 0
+        cur_visit = 0
+
+        for j in range(size - 1):
+            start_city = places_combs[i][j]
+            end_city = places_combs[i][j + 1]
+
+            cur_dist += matrix[start_city][end_city]
+            if cur_dist > max_fuel:
+                flag = 1
+                cur_dist -= matrix[start_city][end_city]
+                break
+
+            cur_visit += 1
+
+        if (cur_dist < min_dist and flag == 0):
+            min_dist = cur_dist
+            best_way = places_combs[i]
+            max_visit_cites = cur_visit
+        elif (max_visit_cites < cur_visit and cur_dist < min_dist):
+            min_dist = cur_dist
+            max_visit_cites = cur_visit
+            best_way = places_combs[i][ : cur_visit]
+
+    return min_dist, best_way
+\end{lstlisting}
+
+\begin{lstlisting}[label=lst:ant_alg,caption=Релизация муравьиного алгоритма]
+    def ant_algorithm(matrix, places, alpha, beta, k_evaporation, days, max_fuel):
+    q = calc_q(matrix, places)
+
+    best_way = []
+    min_dist = float("inf")
+    max_visit_cites = 0
+
+    pheromones = get_pheromones(places)
+    visibility = get_visibility(matrix, places)
+
+    ants = places
+
+    for _ in range(days):
+        route = np.arange(places)
+        visited = get_visited_places(route, ants)
+
+        for ant in range(ants):
+            while len(visited[ant]) != places:
+                pk = find_posibilities(pheromones, visibility, visited, places, ant, alpha, beta)
+                chosen_place = choose_next_place_by_posibility(pk)
+                visited[ant].append(chosen_place - 1)
+
+
+            cur_dist, cur_visit, flag  = res_calc_length(matrix, visited[ant], max_fuel)
+
+            if (cur_dist < min_dist and flag == 0):
+                min_dist = cur_dist
+                best_way = visited[ant]
+                max_visit_cites = cur_visit
+            elif (max_visit_cites < cur_visit and cur_dist < min_dist):
+                min_dist = cur_dist
+                max_visit_cites = cur_visit
+                best_way = visited[ant][ : cur_visit]
+
+        pheromones = update_pheromones(matrix, places, visited, pheromones, q, k_evaporation)
+
+    return min_dist, best_way
+\end{lstlisting}
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstinputlisting}[
+	caption={Алгоритм нахождения массива вероятностных переходов в непосещенные города},
+	label={lst:prob},
+	linerange={59-76}
+]{../main/ant.py}
+\end{lstinputlisting}
+\end{minipage}
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstinputlisting}[
+	caption={Алгоритм нахождения следующего города на основании рандома},
+	label={lst:rand},
+	linerange={78-86}
+]{../main/ant.py}
+\end{lstinputlisting}
+\end{minipage}
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstinputlisting}[
+	caption={Алгоритм обновления матрицы феромонов},
+	label={lst:pher},
+	linerange={40-57}
+]{../main/ant.py}
+\end{lstinputlisting}
+\end{minipage}
+
+\clearpage
+
+\section{Функциональные тесты}
+В таблице \ref{tab:test} представлены функциональные тесты для алгоритма полного перебора
+и муравьиного алгоритма.
+Входными данными являются матрица смежностей и количество топлива, данное для осуществления маршрута. 
+Выходными данными являются маршрут, который удалось пройти с минимальными затратами, и количество топлива, потраченного на данный маршрут.
+\begin{table}[h!]
+	\begin{center}
+        \caption{\label{tab:test}Функциональные тесты}
+        \begin{tabular}{|c|c|c|}
+			\hline
+            \textbf{Входные данные} & \textbf{Вывод} &\textbf{Ожидаемый
+            результат} \\ [2mm]
+            \hline
+            $ \begin{pmatrix}
+                0 &  4 &  2 &  1 & 7 \\
+                4 &  0 &  3 &  7 & 2 \\
+                2 &  3 &  0 & 10 & 3 \\
+                1 &  7 & 10 &  0 & 9 \\
+                7 &  2 &  3 &  9 & 0
+            \end{pmatrix}$, 16 &
+                8, [0, 2, 4, 1, 3] &
+                8, [0, 2, 4, 1, 3] \\
+
+            $ \begin{pmatrix}
+                    0 & 1 & 2 \\
+                    1 & 0 & 1 \\
+                    2 & 1 & 0	
+            \end{pmatrix}$, 10 &
+                4, [0, 1, 2] &
+                4, [0, 1, 2] \\
+
+            $ \begin{pmatrix}
+                0 & 15 & 19 & 20 \\
+                15 &  0 & 12 & 13 \\
+                19 & 12 &  0 & 17 \\
+                20 & 13 & 17 &  0
+            \end{pmatrix}$, 30 &
+                27, [0, 1, 3] &
+                27, [0, 1, 3] \\
+
+            $ \begin{pmatrix}
+                0 & 15 & 19 & 20 \\
+                15 &  0 & 12 & 13 \\
+                19 & 12 &  0 & 17 \\
+                20 & 13 & 17 &  0
+            \end{pmatrix}$, 50 &
+                44, [0, 1, 2, 3] &
+                44, [0, 1, 2, 3] \\
+            \hline 
+		\end{tabular}
+	\end{center}
+\end{table}
+
+Алгоритмы, реализованные в данной лабораторной работе, функциональные тесты прошли успешно.
+
+
+\section*{Вывод}
+
+В данном разделе были реализованы алгоритмы решения задачи коммивояжера: полный
+перебор и муравьиный алгоритм. Также были написаны функциональные тесты для проверки правильности 
+работы программы.
+

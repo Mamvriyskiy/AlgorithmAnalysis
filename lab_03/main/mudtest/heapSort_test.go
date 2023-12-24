@@ -7,8 +7,8 @@ import (
 
 //Слайс элементов отсортированных по убыванию
 func BenchmarkHeapSortTestSortedDescending(b *testing.B) {
-	sliceA := []int{100, 43, 4, 1, -3, -43, -432, -941}
-	sliceB := []int{-941, -432, -43, -3, 1, 4, 43, 100}
+	sliceA := []int{5, 4, 3, 2, 1}
+	sliceB := []int{1, 2, 3, 4, 5}
 
 	sorted.HeapSort(sliceA)
 
@@ -19,8 +19,8 @@ func BenchmarkHeapSortTestSortedDescending(b *testing.B) {
 
 //Слайс элементов отсортированных по возрастанию
 func BenchmarkHeapSortTestSortedAscending(b *testing.B) {
-	sliceA := []int{-943, -432, -43, -3, 1, 4, 43, 100}
-	sliceB := []int{-943, -432, -43, -3, 1, 4, 43, 100}
+	sliceA := []int{1, 2, 3, 4, 5}
+	sliceB := []int{1, 2, 3, 4, 5}
 
 	sorted.HeapSort(sliceA)
 
@@ -31,8 +31,8 @@ func BenchmarkHeapSortTestSortedAscending(b *testing.B) {
 
 //Слайс элементов, расположенных в рандомном порядке
 func BenchmarkHeapSortTestSortedInconsistency(b *testing.B) {
-	sliceA := []int{100, -3, 1, -43, 43, 4, -432, -943}
-	sliceB := []int{-943, -432, -43, -3, 1, 4, 43, 100}
+	sliceA := []int{3, 2, -5, 0, 1}
+	sliceB := []int{-5, 0, 1, 2, 3}
 
 	sorted.HeapSort(sliceA)
 	
@@ -40,3 +40,28 @@ func BenchmarkHeapSortTestSortedInconsistency(b *testing.B) {
 		b.Error("Expected", sliceB, "\ngot", sliceA)
 	}
 }
+
+//Слайс длиной один
+func BenchmarkHeapSortTestSortedLenOne(b *testing.B) {
+	sliceA := []int{1}
+	sliceB := []int{1}
+
+	sorted.HeapSort(sliceA)
+	
+	if !checkSlice(sliceA, sliceB) {
+		b.Error("Expected", sliceB, "\ngot", sliceA)
+	}
+}
+
+//Пустой слайс
+func BenchmarkHeapSortTestSortedEmptySlice(b *testing.B) {
+	sliceA := []int{}
+	sliceB := []int{}
+
+	sorted.HeapSort(sliceA)
+	
+	if !checkSlice(sliceA, sliceB) {
+		b.Error("Expected", sliceB, "\ngot", sliceA)
+	}
+}
+

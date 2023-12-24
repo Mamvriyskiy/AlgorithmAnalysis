@@ -2,7 +2,7 @@ package sorted
 
 func ShakerSort(slice []int) {
 	n := len(slice) - 1
-	for i := 0; i < len(slice); i++ {
+	for i := 0; i < n + 1; i++ {
 		for j := i; j < n; j++ {
 			if slice[j] > slice[j + 1] {
 				slice[j], slice[j + 1] = slice[j + 1], slice[j]

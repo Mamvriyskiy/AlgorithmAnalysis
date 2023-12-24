@@ -1,25 +1,17 @@
 \chapter{Технологическая часть}
 
 В данном разделе описаны требования к программному обеспечению, средства
-реализации, приведены листинги кода и данные, на которых будет проводиться
+реализации, приведены листинги кодов и данные, на которых будет проводиться
 тестирование.
-
-Программа должна предоставлять следующие возможности:
-\begin{itemize}[left=\parindent]
-    \item выбор режима работы: для единичного эксперимента и замер времени работы алгоритмов умножения матриц;
-    \item в режиме единичного эксперимента ввод размеров и содержимого каждой
-          матрицы и вывод полученного разными алгоритмами произведений;
-    \item в режиме замера времени происходит замер времени при различных
-          размерах матриц и построение графиков по полученным данным.
-\end{itemize}
 
 \section{Средства реализации}
 
-Для реализации данной лабораторной работы Go, так как имеет простой синтаксис, 
-большую библиотеку.
+В качестве языка программирования для реализации данной лабораторной работы был выбран язык GO\cite{go}. Данный
+выбор обусловлен тем, что данный язык является типизированным, имеет инструменты 
+для тестирования, профилирования и форматирования кода, быстрая скорость компиляции.
 
-Замеры времени проводились при помощи функции getThreadCpuTimeNs написанной на C, 
-подключенной с помощбю CGO.
+Замеры времени проводились при помощи getThreadCpuTimeNs функции, написанной на C, 
+подключенной с помощью CGO.\cite{cgo}
 
 \section{Реализация алгоритмов}
 
@@ -28,20 +20,27 @@
     \item стандартный алгоритм умножения матриц (листинг \ref{lst:std});
     \item алгоритм Винограда (листинги \ref{lst:Winograd});
     \item оптимизированный алгоритм Винограда (листинги
-          \ref{lst:optWinMulH}-\ref{lst:WinogradOpt}).
+        \ref{lst:WinogradOpt}).
 \end{itemize}
 
-\noindent
-\begin{minipage}{\linewidth}
-\begin{lstinputlisting}[
-	caption={Реализация стандартного алгоритма умножения матриц},
-	label={lst:std},
-	linerange={94-106}
-]{../algorithms/algorithms.go}
-\end{lstinputlisting}
-\end{minipage}
+\clearpage
+\begin{lstlisting}[label=lst:std,caption=Реализация стандартного алгоритма умножения матриц]
+func MulMAtrixA(matrixA, matrixB [][]int, n, m, p int) [][]int {
+        matrixC := make([][]int, n)
+        for i := 0; i < n; i++ {
+            matrixC[i] = make([]int, m) 
+            for j := 0; j < m; j++ { 
+                for k := 0; k < p; k++ {
+                    matrixC[i][j] = matrixC[i][j] + matrixA[i][k] * matrixB[k][j]
+                }
+            }
+        }
 
-\begin{lstlisting}[label=lst:Winograd,caption=Функция нахождения расстояния Левенштейна-Дамерау с помощью рекурсии]
+        return matrixC
+    }
+\end{lstlisting}
+
+\begin{lstlisting}[label=lst:Winograd,caption=Реализация алгоритма Винограда умножения матриц]
 func MulVinogradovA(matrixA, matrixB [][]int, a, b, c int) [][]int {
     row := make([]int, a)
     column := make([]int, c)
@@ -82,7 +81,7 @@ func MulVinogradovA(matrixA, matrixB [][]int, a, b, c int) [][]int {
 }
 \end{lstlisting}
 
-\begin{lstlisting}[label=lst:WinogradOpt,caption=Функция нахождения расстояния Левенштейна-Дамерау с помощью рекурсии]
+\begin{lstlisting}[label=lst:WinogradOpt,caption=Реализация оптимизированного алгоритма Винограда умножения матриц]
 func MulVinogradovB(matrixA, matrixB [][]int, a, b, c int) [][]int {
     row := make([]int, a)
     column := make([]int, c)
@@ -131,8 +130,101 @@ func MulVinogradovB(matrixA, matrixB [][]int, a, b, c int) [][]int {
 }
 \end{lstlisting}
 
+\clearpage
+\section{Описание тестирования}
+
+В таблице \ref{tab:test} представлены функциональные тесты для алгоритмов умножения матриц.
+\begin{table}[h!]
+	\begin{center}
+        \caption{\label{tab:test}Функциональные тесты}
+        \begin{tabular}{|c|c|c|}
+			\hline
+            \textbf{Матрица 1} & \textbf{Матрица 2} &\textbf{Ожидаемый
+            результат} \\ [2mm]
+            \hline
+			$\begin{pmatrix}
+                1 & 2 & 3\\
+                1 & 2 & 3\\
+                1 & 2 & 3
+			\end{pmatrix}$ &
+			$\begin{pmatrix}
+                -1 & 2 & 3\\
+                1 & -2 & 3\\
+                1 & 2 & -3
+			\end{pmatrix}$ &
+			$\begin{pmatrix}
+                4 & 4 & 0\\
+                4 & 4 & 0\\
+                4 & 4 & 0
+			\end{pmatrix}$ \\
+            \hline
+			$\begin{pmatrix}
+                1 & 2 & 3\\
+                1 & 2 & 3
+			\end{pmatrix}$ &
+			$\begin{pmatrix}
+                -1 & -3\\
+                -2 & -2\\
+                -3 & -1
+			\end{pmatrix}$ &
+			$\begin{pmatrix}
+                -14 & -10\\
+                -14 & -10
+			\end{pmatrix}$ \\
+            \hline
+			$\begin{pmatrix}
+                3 & -5\\
+                1 & -2
+			\end{pmatrix}$ &
+			$\begin{pmatrix}
+                2 & -5\\
+                1 & -3
+			\end{pmatrix}$ &
+			$\begin{pmatrix}
+			    1 & 0\\
+                0 & 1
+			\end{pmatrix}$ \\
+            \hline
+			$\begin{pmatrix}
+                1 & 2 & 3\\
+                1 & 2 & 3\\
+                1 & 2 & 3
+			\end{pmatrix}$ &
+			$\begin{pmatrix}
+                0 & 0 & 0\\
+                0 & 0 & 0\\
+                0 & 0 & 0
+			\end{pmatrix}$ &
+			$\begin{pmatrix}
+                0 & 0 & 0\\
+                0 & 0 & 0\\
+                0 & 0 & 0
+			\end{pmatrix}$ \\
+            \hline
+			$\begin{pmatrix}
+                1 & 2 & 3\\
+                1 & 2 & 3\\
+                1 & 2 & 3
+			\end{pmatrix}$ &
+			$\begin{pmatrix}
+                1 & 0 & 0\\
+                0 & 1 & 0\\
+                0 & 0 & 1
+			\end{pmatrix}$ &
+			$\begin{pmatrix}
+                1 & 2 & 3\\
+                1 & 2 & 3\\
+                1 & 2 & 3
+            \end{pmatrix}$ \\
+            \hline
+		\end{tabular}
+	\end{center}
+\end{table}
+
+Алгоритмы, реализованные в данной лабораторной работе, функциональные тесты прошли успешно.
+
+
 \section{Вывод}
 
 В данном разделе были реализованы алгоритмы умножения матриц: стандартный, 
-Винограда и оптимизированный Винограда. Также были написаны тесты для каждого класса 
-эквивалентности, описанного в конструкторском разделе.
+Винограда и оптимизированный Винограда. Также для проверки правильности работы программы были выделены классы эквивалентности тестов.

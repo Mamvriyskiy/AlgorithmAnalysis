@@ -14,7 +14,7 @@ func main() {
 	num := 0
 	var err error
 	for {
-		fmt.Println("Menu:\n1)Search distance;\n2)Check time;\n3)Exite.\nEntry: ")
+		fmt.Println("Меню:\n1)Поиск дистанции;\n2)Проверка времени;\n3)Выход.\nВвод: ")
 		_, err = fmt.Fscan(reader, &num)
 		if err != nil {
 			os.Exit(-1)
@@ -25,6 +25,7 @@ func main() {
 			searchDistance(reader)
 		} else if num == 2 {
 			checktime.CheckTime()
+			checktime.CheckMemoryEx()
 		} else {
 			break
 		}	

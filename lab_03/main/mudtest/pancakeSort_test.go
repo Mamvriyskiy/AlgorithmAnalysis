@@ -23,8 +23,8 @@ func checkSlice(sliceA, sliceB []int) bool {
 
 //Слайс элементов отсортированных по убыванию
 func BenchmarkPancakeSortTestSortedDescending(b *testing.B) {
-	sliceA := []int{100, 43, 4, 1, -3, -43, -432, -941}
-	sliceB := []int{-941, -432, -43, -3, 1, 4, 43, 100}
+	sliceA := []int{5, 4, 3, 2, 1}
+	sliceB := []int{1, 2, 3, 4, 5}
 
 	sorted.PancakeSort(sliceA)
 
@@ -35,8 +35,8 @@ func BenchmarkPancakeSortTestSortedDescending(b *testing.B) {
 
 //Слайс элементов отсортированных по возрастанию
 func BenchmarkPancakeSortTestSortedAscending(b *testing.B) {
-	sliceA := []int{-943, -432, -43, -3, 1, 4, 43, 100}
-	sliceB := []int{-943, -432, -43, -3, 1, 4, 43, 100}
+	sliceA := []int{1, 2, 3, 4, 5}
+	sliceB := []int{1, 2, 3, 4, 5}
 
 	sorted.PancakeSort(sliceA)
 
@@ -47,8 +47,32 @@ func BenchmarkPancakeSortTestSortedAscending(b *testing.B) {
 
 //Слайс элементов, расположенных в рандомном порядке
 func BenchmarkPancakeSortTestSortedInconsistency(b *testing.B) {
-	sliceA := []int{100, -3, 1, -43, 43, 4, -432, -943}
-	sliceB := []int{-943, -432, -43, -3, 1, 4, 43, 100}
+	sliceA := []int{3, 2, -5, 0, 1}
+	sliceB := []int{-5, 0, 1, 2, 3}
+
+	sorted.PancakeSort(sliceA)
+	
+	if !checkSlice(sliceA, sliceB) {
+		b.Error("Expected", sliceB, "\ngot", sliceA)
+	}
+}
+
+//Слайс длиной один
+func BenchmarkPancakeSortTestSortedLenOne(b *testing.B) {
+	sliceA := []int{1}
+	sliceB := []int{1}
+
+	sorted.PancakeSort(sliceA)
+	
+	if !checkSlice(sliceA, sliceB) {
+		b.Error("Expected", sliceB, "\ngot", sliceA)
+	}
+}
+
+//Пустой слайс
+func BenchmarkPancakeSortTestSortedEmptySlice(b *testing.B) {
+	sliceA := []int{}
+	sliceB := []int{}
 
 	sorted.PancakeSort(sliceA)
 	

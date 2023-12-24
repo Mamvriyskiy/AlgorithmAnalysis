@@ -1,0 +1,215 @@
+\chapter{Технологическая часть}
+
+В данном разделе описаны требования к программному обеспечению, средства реализации, приведены листинги кода и данные, 
+на которых будет проводиться тестирование.
+
+\section{Средства реализации}
+Для реализации данной лабораторной работы выбран компилируемый многопоточный
+язык програмирования \texttt{Go}~\cite{golang}, так как он предоставляет
+необходимый функционал для работы с потоками и простоую реализацию их
+взаимодействия.
+
+Замеры времени проводились при помощи getThreadCpuTimeNs функции, написанной на C, 
+подключенной с помощью CGO~\cite{cgo}.
+
+\newpage
+\section{Реализация алгоритмов}
+
+В данном подразделе представлены листинги кода алгоритмов:
+\begin{itemize}
+    \item реализация линейной обработки \ref{lst:line};
+    \item реализация конвейерной обработки \ref{lst:pip};
+    \item реализация стандартного алгоритма умножения матриц \ref{lst:stand}
+    \item реализация алгоритма Винограда умножения матриц \ref{lst:vino}
+\end{itemize}
+
+\begin{lstlisting}[label=lst:line,caption=Релизация линейной обработки]
+func serialMtr(sliceMtr []matrixStruct, count int) {
+    for i := range sliceMtr {
+        sliceMtr[i].inverseMatrix = gaussMethodEx(sliceMtr[i].matrixA)
+        sliceMtr[i].standartMul = mulStandart(sliceMtr[i].inverseMatrix, sliceMtr[i].matrixB, sliceMtr[i].size)
+        sliceMtr[i].vinogradMul = mulVinogradov(sliceMtr[i].inverseMatrix, sliceMtr[i].matrixB, sliceMtr[i].size)
+    }
+}
+\end{lstlisting}
+
+\begin{lstinputlisting}[
+    caption={Релизация линейной обработки},
+    label={lst:pip},
+    linerange={8-82}
+]{../main/pipeline.go}
+\end{lstinputlisting}
+
+\clearpage
+\noindent
+\begin{lstinputlisting}[
+	caption={Реализация алгоритма стандартного метода умножения матриц},
+	label={lst:stand},
+	linerange={3-16}
+]{../main/standart.go}
+\end{lstinputlisting}
+
+\noindent
+\begin{lstinputlisting}[
+	caption={Реализация алгоритма Винограда умножения матриц},
+	label={lst:vino},
+	linerange={3-48}
+]{../main/vinograd.go}
+\end{lstinputlisting}
+
+\section{Функциональные тесты}
+
+В таблице \ref{tab:test} представлены функциональные тесты для алгоритмов умножения матриц, а в таблице 
+\ref{tab:tests} приведены функциональные тесты для алгоритма
+нахождения обратной матрицы.
+
+\clearpage
+\begin{table}[h!]
+	\begin{center}
+        \caption{\label{tab:test}Функциональные тесты}
+        \begin{tabular}{|c|c|c|}
+			\hline
+            \textbf{Матрица 1} & \textbf{Матрица 2} &\textbf{Ожидаемый
+            результат} \\ [2mm]
+            \hline
+			$\begin{pmatrix}
+                1 & 2 & 3\\
+                1 & 2 & 3\\
+                1 & 2 & 3
+			\end{pmatrix}$ &
+			$\begin{pmatrix}
+                -1 & 2 & 3\\
+                1 & -2 & 3\\
+                1 & 2 & -3
+			\end{pmatrix}$ &
+			$\begin{pmatrix}
+                4 & 4 & 0\\
+                4 & 4 & 0\\
+                4 & 4 & 0
+			\end{pmatrix}$ \\
+            \hline
+			$\begin{pmatrix}
+                1 & 2 & 3\\
+                1 & 2 & 3
+			\end{pmatrix}$ &
+			$\begin{pmatrix}
+                -1 & -3\\
+                -2 & -2\\
+                -3 & -1
+			\end{pmatrix}$ &
+			$\begin{pmatrix}
+                -14 & -10\\
+                -14 & -10
+			\end{pmatrix}$ \\
+            \hline
+			$\begin{pmatrix}
+                3 & -5\\
+                1 & -2
+			\end{pmatrix}$ &
+			$\begin{pmatrix}
+                2 & -5\\
+                1 & -3
+			\end{pmatrix}$ &
+			$\begin{pmatrix}
+			    1 & 0\\
+                0 & 1
+			\end{pmatrix}$ \\
+            \hline
+			$\begin{pmatrix}
+                1 & 2 & 3\\
+                1 & 2 & 3\\
+                1 & 2 & 3
+			\end{pmatrix}$ &
+			$\begin{pmatrix}
+                0 & 0 & 0\\
+                0 & 0 & 0\\
+                0 & 0 & 0
+			\end{pmatrix}$ &
+			$\begin{pmatrix}
+                0 & 0 & 0\\
+                0 & 0 & 0\\
+                0 & 0 & 0
+			\end{pmatrix}$ \\
+            \hline
+			$\begin{pmatrix}
+                1 & 2 & 3\\
+                1 & 2 & 3\\
+                1 & 2 & 3
+			\end{pmatrix}$ &
+			$\begin{pmatrix}
+                1 & 0 & 0\\
+                0 & 1 & 0\\
+                0 & 0 & 1
+			\end{pmatrix}$ &
+			$\begin{pmatrix}
+                1 & 2 & 3\\
+                1 & 2 & 3\\
+                1 & 2 & 3
+            \end{pmatrix}$ \\
+            \hline
+		\end{tabular}
+	\end{center}
+\end{table}
+
+\begin{table}[h!]
+	\begin{center}
+        \caption{\label{tab:tests}Функциональные тесты}
+        \begin{tabular}{|c|c|}
+			\hline
+            \textbf{Матрица} & \textbf{Ожидаемый
+            результат}\\ [2mm]
+            \hline
+			$\begin{pmatrix}
+                5 & 9 & 2\\
+                6 & 11 & 4\\
+                1 & 3 & 1
+			\end{pmatrix}$ &
+			$\begin{pmatrix}
+                0.1 & 0.3 & -2\\
+                0.2 & 0 & 0.9\\
+                -1 & 0.7 & 0
+			\end{pmatrix}$\\
+            \hline
+            $\begin{pmatrix}
+                1 & 0 & 0 \\
+                0 & 2 & 0 \\
+                0 & 0 & 3 \\
+			\end{pmatrix}$ &
+			$\begin{pmatrix}
+                1 & 0 & 0 \\
+                0 & 0.5 & 0 \\
+                0 & 0& 0.33333 \\
+			\end{pmatrix}$\\
+            \hline
+			$\begin{pmatrix}
+                2 & 1 & -1 \\
+                3 & 2 & -2 \\
+                1 & -1 & 2
+			\end{pmatrix}$ &
+			$\begin{pmatrix}
+                2 & -1 & 0 \\
+                -8 & 5 & 1 \\
+                -5 & 3 & 1
+			\end{pmatrix}$\\
+            \hline
+			$\begin{pmatrix}
+                1 & 2\\
+                3 & 4\\
+			\end{pmatrix}$ &
+            $\begin{pmatrix}
+                -2 & 1\\
+                1.5 & -0.5
+			\end{pmatrix}$\\
+            \hline
+		\end{tabular}
+	\end{center}
+\end{table}
+
+Алгоритмы, реализованные в данной лабораторной работе, функциональные тесты прошли успешно.
+
+\clearpage
+\section*{Вывод}
+
+В данном разделе были реализованы последовательный и конвейрный алгоритмы
+поэтапной обрабокти матриц. Также были написаны функциональные тесты для проверки
+правильности работы программы.

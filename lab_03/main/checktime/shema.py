@@ -30,7 +30,7 @@ for i in range(lenl):
 
 # Данные
 data = {
-    'LENGHT': lenght,
+    'LENGTH': lenght,
     'Pancake' : a,
     'Heap' : c,
     'Shaker' : d
@@ -48,13 +48,13 @@ plt.figure(figsize=(12, 6))
 k = 0
 # Добавление графиков для каждой колонки
 for i, column in enumerate(df.columns[1:]):
-    plt.plot(df['LENGHT'], df[column], label=column, marker = markers[i])
+    plt.plot(df['LENGTH'], df[column], label=column, marker = markers[i])
 
 # Настройка легенды и заголовка
 plt.legend(loc='upper left')
-plt.title('График зависимости времени выполнения от LENGTH')
-plt.xlabel('LENGTH')
-plt.ylabel('Время выполнения (нс)')
+plt.title('График зависимости времени выполнения от длины')
+plt.xlabel('Длина среза')
+plt.ylabel('Время выполнения (мкс)')
 
 # Отображение графика
 plt.show()

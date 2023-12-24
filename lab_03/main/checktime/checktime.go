@@ -11,7 +11,9 @@ package checktime
 			perror("clock_gettime");
 			return 0;
 		}
-		return t.tv_sec * 1000000000LL + t.tv_nsec;
+		
+        // return t.tv_sec * 1000LL + t.tv_nsec / 1000000LL;
+        return t.tv_sec * 1000000LL + t.tv_nsec / 1000LL;
 	}
 */
 import "C"
@@ -24,6 +26,7 @@ import (
 	"math/rand"
 	"../sorted"
 	"github.com/olekukonko/tablewriter"
+    // "runtime"
 )
 
 type createSliceFunc func(int) []int
@@ -59,31 +62,58 @@ func checkTime(createFunc createSliceFunc) {
         var timeD int64
 
         {
-            start := C.getThreadCpuTimeNs()
+            var time int64
             for j := 0; j < 10; j++ {
+                sliceTest := make([]int, len(slice))
+                copy(sliceTest, slice)
+                start := C.getThreadCpuTimeNs()
                 sorted.PancakeSort(slice)
+                finish := C.getThreadCpuTimeNs()
+                time += int64(finish - start)
             }
-            finish := C.getThreadCpuTimeNs()
-            timeA = int64(finish - start) / 10
+            timeA = time / 10
         }
+        // var b1, b2 runtime.MemStats
+        // runtime.ReadMemStats(&b1)
+        // sorted.PancakeSort(slice)
+        // runtime.ReadMemStats(&b2)
+        // timeA = int64(b2.TotalAlloc - b1.TotalAlloc)
     
         {
-            start := C.getThreadCpuTimeNs()
+            var time int64
             for j := 0; j < 10; j++ {
+                sliceTest := make([]int, len(slice))
+                copy(sliceTest, slice)
+                start := C.getThreadCpuTimeNs()
                 sorted.HeapSort(slice)
+                finish := C.getThreadCpuTimeNs()
+                time += int64(finish - start)
             }
-            finish := C.getThreadCpuTimeNs()
-            timeC = int64(finish - start) / 10
+            timeC = time / 10
         }
 
+        // runtime.ReadMemStats(&b1)
+        // sorted.HeapSort(slice)
+        // runtime.ReadMemStats(&b2)
+        // timeC = int64(b2.TotalAlloc - b1.TotalAlloc)
+
         {
-            start := C.getThreadCpuTimeNs()
+            var time int64
             for j := 0; j < 10; j++ {
+                sliceTest := make([]int, len(slice))
+                copy(sliceTest, slice)
+                start := C.getThreadCpuTimeNs()
                 sorted.ShakerSort(slice)
+                finish := C.getThreadCpuTimeNs()
+                time += int64(finish - start)
             }
-            finish := C.getThreadCpuTimeNs()
-            timeD = int64(finish - start) / 10
+            timeD = time / 10
         }
+
+        // runtime.ReadMemStats(&b1)
+        // sorted.ShakerSort(slice)
+        // runtime.ReadMemStats(&b2)
+        // timeD = int64(b2.TotalAlloc - b1.TotalAlloc)
 
 
         lenght = append(lenght, i)
@@ -112,7 +142,7 @@ func checkTime(createFunc createSliceFunc) {
             STEPLENGHT = 1000
         }
 
-        fmt.Println("Complite: ", i)
+        fmt.Println("Complete: ", i)
     }
 
     createPythonScript(lenght, a, c, d)
